@@ -1,0 +1,75 @@
+import tkinter as tk
+from tkinter import simpledialog,messagebox
+from typing import Self
+class contactbook(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("contactbook")
+        self.contacts=[]
+        self.load_contacts()
+        self.listbox=tk.Listbox(self, width=40, height=10)
+        self.listbox.pack(pady=10)
+        self.search_entry=tk.Entry(self, width=30)
+        self.search_entry.pack(side=tk.LEFT, padx=5)
+        self.update_listbox()
+        add_button=tk.Button(self, text="add contact", command=self.add_contact)
+        add_button.pack(side=tk.LEFT, padx=5)
+        edit_button=tk.Button(self, text="edit contact", command=self.edit_contact)
+        edit_button.pack(side=tk.LEFT, padx=5)
+        delete_button=tk.Button(self, text="delete contact", command=self.delete_contact)
+        delete_button.pack(side=tk.LEFT, padx=5)
+        search_button=tk.Button(self, text="search", command=self.search_contacts)
+        search_button.pack(side=tk.LEFT, padx=5)
+        view_button=tk.Button(self, text="view contact", command=self.view_contact)
+        view_button.pack(side=tk.LEFT, padx=5)
+    def add_contact(self):
+        contact=simpledialog.askstring("add contact", "enter contact name:")
+        if contact:
+            self.contacts.append(contact)
+            self.update_listbox()
+            self.save_contacts()
+    def edit_contact(self):
+        selected_index=self.listbox.curselection()
+        if selected_index:
+            contact_name=self.contacts[selected_index[0]]
+            new_name=simpledialog.askstring("edit contact",f"edit contact name for {contact_name}:")
+            if new_name:
+                self.contacts[selected_index[0]]=new_name
+                self.update_listbox()
+                self.save_contacts()
+    def delete_contact(self):
+        selected_index=self.listbox.curselection()
+        if selected_index:
+            del self.contacts[selected_index[0]] 
+            self.update_listbox()
+            self.save_contacts()
+    def view_contact(self):
+        selected_index = self.listbox.curselection()
+        if selected_index:
+            contact_name = self.contacts[selected_index[0]]
+            messagebox.showinfo("Contact Details", f"Contact Name: {contact_name}")   
+    def search_contacts(self):
+        search_term=self.search_entry.get().lower()
+        search_results=[contact for contact in self.contacts if search_term in contact.lower()]
+        print(search_results)
+        self.display_search_results(search_results)
+    def update_listbox(self):
+        self.listbox.delete(0, tk.END)
+        for contact in self.contacts:
+            self.listbox.insert(tk.END, contact)
+    def save_contacts(self):
+        with open("contacts.txt","w") as file:
+            for contact in self.contacts:
+                file.write(contact+"\n")
+    def load_contacts(self):
+        try:
+            with open("contacts.txt","r") as file:
+                self.contacts=[line.strip() for line in file.readlines()]
+        except FileNotFoundError:
+                    pass
+            
+                    
+if __name__=="__main__":
+    app=contactbook()
+    app.geometry("400x300")
+    app.mainloop()
